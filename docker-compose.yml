@@ -1,0 +1,51 @@
+services:
+
+  app:
+    image: php:8.1-fpm
+    container_name: php-dependencies
+    working_dir: /var/www
+    volumes:
+      - laravel-code:/var/www
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  node:
+    image: node:18
+    container_name: node-dependencies
+    working_dir: /usr/src/app
+    volumes:
+      - angular-code:/usr/src/app
+    ports:
+      - "4200:4200"
+    command: ["tail", "-f", "/dev/null"]
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  laravel-code:
+  angular-code:
+  db_data:
